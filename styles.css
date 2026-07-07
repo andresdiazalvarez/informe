@@ -1,17 +1,17 @@
 :root {
   color-scheme: light;
-  --bg: #e8fbf7;
+  --bg: #d9fff8;
   --panel: #ffffff;
   --ink: #173332;
   --muted: #5d7a78;
-  --line: #b9e5df;
-  --accent: #16a394;
-  --accent-dark: #08796f;
-  --accent-soft: #cbf5ef;
+  --line: #92f4e6;
+  --accent: #00cdb7;
+  --accent-dark: #009b8c;
+  --accent-soft: #b8fff3;
   --warning: #b45309;
   --success: #15803d;
   --archive: #596579;
-  --shadow: 0 18px 50px rgba(8, 121, 111, 0.14);
+  --shadow: 0 18px 50px rgba(0, 155, 140, 0.18);
 }
 
 * {
@@ -44,7 +44,7 @@ button {
 }
 
 .sidebar {
-  background: #063f3b;
+  background: #005c55;
   color: #f5fbfb;
   padding: 28px 22px;
   display: flex;
@@ -64,8 +64,8 @@ button {
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: #92f2e5;
-  color: #063f3b;
+  background: #86fff0;
+  color: #005c55;
   font-weight: 800;
 }
 
@@ -206,7 +206,7 @@ button {
 
 .upload-zone.dragging {
   border-color: var(--accent);
-  background: #effdfa;
+  background: #e4fff9;
 }
 
 #fileInput {
@@ -382,7 +382,7 @@ textarea {
 
 .report-card.selected {
   border-color: var(--accent);
-  background: #effdfa;
+  background: #e4fff9;
 }
 
 .report-main {
@@ -402,8 +402,8 @@ textarea {
   border-radius: 8px;
   display: grid;
   place-items: center;
-  background: #d9f8f3;
-  color: #08796f;
+  background: #c2fff5;
+  color: #009b8c;
   font-size: 12px;
   font-weight: 800;
 }
