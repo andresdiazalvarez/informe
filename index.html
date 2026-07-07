@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestor de informes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Resumen">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">IR</div>
+          <div>
+            <h1>Informes</h1>
+            <p>Archivo local</p>
+          </div>
+        </div>
+
+        <section class="metric-panel" aria-label="Indicadores">
+          <div>
+            <span class="metric-label">Total</span>
+            <strong id="totalReports">0</strong>
+          </div>
+          <div>
+            <span class="metric-label">Pendientes</span>
+            <strong id="pendingReports">0</strong>
+          </div>
+          <div>
+            <span class="metric-label">Este mes</span>
+            <strong id="monthReports">0</strong>
+          </div>
+        </section>
+
+        <nav class="status-nav" aria-label="Estados">
+          <button class="status-filter active" data-status="todos" type="button">
+            <span>Todos</span>
+            <b id="countAll">0</b>
+          </button>
+          <button class="status-filter" data-status="pendiente" type="button">
+            <span>Pendientes</span>
+            <b id="countPending">0</b>
+          </button>
+          <button class="status-filter" data-status="revisado" type="button">
+            <span>Revisados</span>
+            <b id="countReviewed">0</b>
+          </button>
+          <button class="status-filter" data-status="archivado" type="button">
+            <span>Archivados</span>
+            <b id="countArchived">0</b>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Panel de carga</p>
+            <h2>Sube y organiza informes</h2>
+          </div>
+          <button id="exportCsv" class="ghost-button" type="button" title="Exportar listado CSV">
+            Exportar CSV
+          </button>
+        </header>
+
+        <section class="upload-zone" id="dropZone">
+          <input
+            id="fileInput"
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg"
+          />
+          <div class="upload-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M12 3l4.5 4.5-1.4 1.4-2.1-2.08V15h-2V6.82L8.9 8.9 7.5 7.5 12 3z" />
+              <path d="M5 14h2v4h10v-4h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-5z" />
+            </svg>
+          </div>
+          <div>
+            <h3>Arrastra informes aquí</h3>
+            <p>PDF, Word, Excel, CSV, imágenes o texto. También puedes seleccionar varios archivos.</p>
+          </div>
+          <button id="pickFiles" class="primary-button" type="button">Seleccionar archivos</button>
+        </section>
+
+        <section class="entry-panel" aria-label="Datos del informe">
+          <form id="reportForm">
+            <div class="form-grid">
+              <label>
+                Título
+                <input id="reportTitle" name="title" type="text" placeholder="Ej. Informe mensual PCI" />
+              </label>
+              <label>
+                Proyecto
+                <input id="reportProject" name="project" type="text" placeholder="Ej. BAE 10" />
+              </label>
+              <label>
+                Tipo
+                <select id="reportType" name="type">
+                  <option value="Técnico">Técnico</option>
+                  <option value="Inspección">Inspección</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                  <option value="Financiero">Financiero</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </label>
+              <label>
+                Estado
+                <select id="reportStatus" name="status">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="revisado">Revisado</option>
+                  <option value="archivado">Archivado</option>
+                </select>
+              </label>
+            </div>
+            <label class="notes-field">
+              Notas
+              <textarea id="reportNotes" name="notes" rows="3" placeholder="Añade observaciones o acciones pendientes"></textarea>
+            </label>
+            <div class="form-actions">
+              <span id="selectedFilesLabel">Sin archivos seleccionados</span>
+              <button class="primary-button" type="submit">Guardar informes</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="entry-panel text-registry-panel" aria-label="Registro de textos">
+          <div class="section-heading">
+            <h3>Registro de textos</h3>
+            <span id="textRecordCount">0 guardados</span>
+          </div>
+          <form id="textRecordForm">
+            <div class="text-record-grid">
+              <label>
+                Titulo/opcion
+                <input id="textRecordTitle" type="text" placeholder="Ej. Resumen de inspeccion" required />
+              </label>
+              <label>
+                Escoger titulo
+                <select id="textRecordSelect">
+                  <option value="">Selecciona un texto guardado</option>
+                </select>
+              </label>
+            </div>
+            <label class="notes-field">
+              Texto
+              <textarea id="textRecordBody" rows="5" placeholder="Escribe aqui el texto que quieres recuperar al escoger este titulo"></textarea>
+            </label>
+            <div class="form-actions">
+              <span id="textRecordStatus">Sin texto seleccionado</span>
+              <div class="inline-actions">
+                <button class="ghost-button" id="deleteTextRecord" type="button">Eliminar texto</button>
+                <button class="primary-button" type="submit">Guardar texto</button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <section class="toolbar" aria-label="Búsqueda y filtros">
+          <label class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.5 4a6.5 6.5 0 0 1 5.16 10.45l4.45 4.44-1.42 1.42-4.44-4.45A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z" />
+            </svg>
+            <input id="searchInput" type="search" placeholder="Buscar por título, proyecto, notas o archivo" />
+          </label>
+          <select id="typeFilter" aria-label="Filtrar por tipo">
+            <option value="todos">Todos los tipos</option>
+            <option value="Técnico">Técnico</option>
+            <option value="Inspección">Inspección</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Financiero">Financiero</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <select id="sortSelect" aria-label="Ordenar informes">
+            <option value="recent">Más recientes</option>
+            <option value="title">Título A-Z</option>
+            <option value="project">Proyecto A-Z</option>
+          </select>
+        </section>
+
+        <section class="content-grid">
+          <div class="reports-panel">
+            <div class="section-heading">
+              <h3>Informes cargados</h3>
+              <span id="visibleCount">0 visibles</span>
+            </div>
+            <div id="reportsList" class="reports-list" aria-live="polite"></div>
+          </div>
+
+          <aside class="preview-panel" aria-label="Vista previa">
+            <div id="previewEmpty" class="preview-empty">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5zM8 11h8v2H8v-2zm0 4h8v2H8v-2z" />
+              </svg>
+              <h3>Selecciona un informe</h3>
+              <p>Verás sus datos y una vista previa cuando el formato lo permita.</p>
+            </div>
+            <div id="previewContent" class="preview-content hidden"></div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <template id="reportCardTemplate">
+      <article class="report-card">
+        <button class="report-main" type="button">
+          <span class="file-badge"></span>
+          <span>
+            <strong class="report-title"></strong>
+            <small class="report-meta"></small>
+          </span>
+        </button>
+        <div class="report-tags">
+          <span class="tag report-type"></span>
+          <span class="tag report-status"></span>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
