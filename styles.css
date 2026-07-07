@@ -156,6 +156,13 @@ button {
   gap: 20px;
 }
 
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .topbar h2 {
   font-size: clamp(26px, 4vw, 42px);
   letter-spacing: 0;
@@ -182,6 +189,11 @@ button {
 .ghost-button {
   color: var(--accent-dark);
   background: var(--accent-soft);
+}
+
+.install-button {
+  background: #ffffff;
+  border: 1px solid var(--line);
 }
 
 .upload-zone,
@@ -588,6 +600,7 @@ textarea {
   }
 
   .topbar,
+  .topbar-actions,
   .toolbar,
   .form-actions,
   .inline-actions,

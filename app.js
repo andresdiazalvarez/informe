@@ -31,6 +31,7 @@ const elements = {
   textRecordSelect: document.querySelector("#textRecordSelect"),
   textRecordStatus: document.querySelector("#textRecordStatus"),
   textRecordCount: document.querySelector("#textRecordCount"),
+  newTextRecord: document.querySelector("#newTextRecord"),
   deleteTextRecord: document.querySelector("#deleteTextRecord"),
   selectedFilesLabel: document.querySelector("#selectedFilesLabel"),
   reportsList: document.querySelector("#reportsList"),
@@ -42,6 +43,7 @@ const elements = {
   previewEmpty: document.querySelector("#previewEmpty"),
   previewContent: document.querySelector("#previewContent"),
   exportCsv: document.querySelector("#exportCsv"),
+  installApp: document.querySelector("#installApp"),
   visibleCount: document.querySelector("#visibleCount"),
   totalReports: document.querySelector("#totalReports"),
   pendingReports: document.querySelector("#pendingReports"),
@@ -53,6 +55,7 @@ const elements = {
 };
 
 let dbPromise;
+let deferredInstallPrompt = null;
 
 function openDb() {
   if (dbPromise) return dbPromise;
@@ -147,7 +150,7 @@ function renderTextRecords(selectedId = "") {
 
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Selecciona un texto guardado";
+  placeholder.textContent = "Selecciona una cabecera guardada";
   elements.textRecordSelect.append(placeholder);
 
   state.textRecords
@@ -169,13 +172,21 @@ function selectTextRecord(id) {
   if (!record) {
     elements.textRecordTitle.value = "";
     elements.textRecordBody.value = "";
-    elements.textRecordStatus.textContent = "Sin texto seleccionado";
+    elements.textRecordStatus.textContent = "Sin cabecera seleccionada";
     return;
   }
 
   elements.textRecordTitle.value = record.title;
   elements.textRecordBody.value = record.body;
-  elements.textRecordStatus.textContent = `Texto cargado: ${record.title}`;
+  elements.textRecordStatus.textContent = `Texto cargado desde: ${record.title}`;
+}
+
+function clearTextRecordForm() {
+  elements.textRecordSelect.value = "";
+  elements.textRecordTitle.value = "";
+  elements.textRecordBody.value = "";
+  elements.textRecordStatus.textContent = "Nuevo texto listo para guardar";
+  elements.textRecordTitle.focus();
 }
 
 function handleTextRecordSubmit(event) {
@@ -184,7 +195,7 @@ function handleTextRecordSubmit(event) {
   const title = elements.textRecordTitle.value.trim();
   const body = elements.textRecordBody.value.trim();
   if (!title || !body) {
-    alert("Escribe un titulo y un texto antes de guardar.");
+    alert("Escribe una cabecera y un texto antes de guardar.");
     return;
   }
 
@@ -211,7 +222,7 @@ function handleTextRecordSubmit(event) {
 function deleteSelectedTextRecord() {
   const selectedId = elements.textRecordSelect.value;
   if (!selectedId) {
-    alert("Escoge un titulo para eliminarlo.");
+    alert("Escoge una cabecera para eliminarla.");
     return;
   }
 
@@ -219,6 +230,37 @@ function deleteSelectedTextRecord() {
   saveTextRecords();
   renderTextRecords();
   selectTextRecord("");
+}
+
+function bindInstallPrompt() {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    elements.installApp.classList.remove("hidden");
+  });
+
+  elements.installApp.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    elements.installApp.classList.add("hidden");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    elements.installApp.classList.add("hidden");
+  });
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch((error) => {
+      console.warn("No se pudo registrar la app instalable.", error);
+    });
+  });
 }
 
 function setSelectedFiles(files) {
@@ -293,7 +335,7 @@ function renderReports() {
     card.classList.toggle("selected", report.id === state.selectedId);
     card.querySelector(".file-badge").textContent = fileExtension(report.fileName);
     card.querySelector(".report-title").textContent = report.title;
-    card.querySelector(".report-meta").textContent = `${report.project || "Sin proyecto"} · ${formatDate(report.createdAt)} · ${formatBytes(report.size)}`;
+    card.querySelector(".report-meta").textContent = `${report.project || "Sin proyecto"} - ${formatDate(report.createdAt)} - ${formatBytes(report.size)}`;
     card.querySelector(".report-type").textContent = report.type;
     const status = card.querySelector(".report-status");
     status.textContent = report.status;
@@ -331,7 +373,7 @@ function renderPreview(report) {
     ["Tipo", report.type],
     ["Estado", report.status],
     ["Fecha", formatDate(report.createdAt)],
-    ["Tamaño", formatBytes(report.size)],
+    ["Tamano", formatBytes(report.size)],
     ["Notas", report.notes || "Sin notas"],
   ];
   details.innerHTML = detailItems.map(([label, value]) => `<dt>${label}</dt><dd></dd>`).join("");
@@ -378,7 +420,7 @@ function renderPreview(report) {
   remove.type = "button";
   remove.textContent = "Eliminar";
   remove.addEventListener("click", async () => {
-    const confirmed = confirm(`¿Eliminar "${report.title}"?`);
+    const confirmed = confirm(`Eliminar "${report.title}"?`);
     if (!confirmed) return;
     await deleteReport(report.id);
     state.reports = state.reports.filter((item) => item.id !== report.id);
@@ -499,6 +541,7 @@ function bindEvents() {
   elements.reportForm.addEventListener("submit", handleSubmit);
   elements.textRecordForm.addEventListener("submit", handleTextRecordSubmit);
   elements.textRecordSelect.addEventListener("change", (event) => selectTextRecord(event.target.value));
+  elements.newTextRecord.addEventListener("click", clearTextRecordForm);
   elements.deleteTextRecord.addEventListener("click", deleteSelectedTextRecord);
   elements.searchInput.addEventListener("input", (event) => {
     state.query = event.target.value;
@@ -524,6 +567,8 @@ function bindEvents() {
 
 async function init() {
   bindEvents();
+  bindInstallPrompt();
+  registerServiceWorker();
   loadTextRecords();
   renderTextRecords();
   state.reports = await getAllReports();
